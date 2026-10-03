@@ -220,9 +220,13 @@ Bonus được chọn theo điểm yếu thật của data: data cố tình ch�
 
 **Chưa làm:** memory decay. Rủi ro 1 ở mục 3.5 (tag style / sở thích chỉ tăng) là chỗ cần decay nhất: giảm ưu tiên các tag lâu không được nhắc lại, rồi xóa khi tụt dưới ngưỡng.
 
-## 5. Chế độ live (phần mở rộng, chưa chạy với model thật)
+## 5. Chế độ live: chạy với OpenAI gpt-4o-mini
 
-`_maybe_build_langchain_agent()` trong hai agent đã được viết đủ thành phần, nhưng **chưa được chạy thử với API key thật**. Các số liệu ở trên đều là của chế độ offline.
+Lệnh chạy: `LLM_MODE=live python src/benchmark.py`, với key trong `.env`. Output đầy đủ: [`results/benchmark_output_live.md`](results/benchmark_output_live.md).
+
+Kết quả live **không tất định**: model thật trả lời khác nhau giữa các lần chạy. Vì vậy số liệu chính của bài vẫn là số offline ở mục 2. Số live dùng để kiểm tra các kết luận có còn đúng với model thật hay không.
+
+**Cách dựng agent live:**
 
 - **Baseline:** `create_agent` + `InMemorySaver`. Checkpoint theo `thread_id`, nên vẫn chỉ nhớ trong thread.
 - **Advanced:** `create_agent` với:
@@ -230,8 +234,47 @@ Bonus được chọn theo điểm yếu thật của data: data cố tình ch�
   - tool `read_user_memory` / `save_user_fact` (ghi qua cùng hàm `apply_profile_updates()`),
   - `dynamic_prompt` chèn `User.md` vào prompt,
   - `SummarizationMiddleware(trigger=("tokens", 600), keep=("messages", 4))`.
-- **Lưu ý về cột Compactions ở chế độ live:** cột này được tính bằng cách cho compact offline chạy song song với cùng ngưỡng. Nó **không** đếm số lần middleware thật sự tóm tắt.
-- Cột Response quality vẫn dùng heuristic. `judge_model` đã có trong config nhưng chưa được nối vào chấm điểm.
+- Bộ trích fact tất định vẫn chạy trước mỗi lượt, như một lớp an toàn.
+
+**Kết quả live so với offline:**
+
+| Bộ | Agent | Agent tokens | Prompt tokens | Recall | Quality | Memory growth | Compactions |
+|---|---|--:|--:|--:|--:|--:|--:|
+| Standard | Baseline | 6,078 | 43,309 | 11% | 0.45 | 0 | 0 |
+| Standard | Advanced | 10,453 | 77,452 (+79%) | 100% | 0.99 | 1,039 | 28 |
+| Stress | Baseline | 3,356 | 47,125 | 0% | 0.40 | 0 | 0 |
+| Stress | Advanced | 3,299 | 19,569 (−58%) | 100% | 1.00 | 793 | 28 |
+
+**Các kết luận vẫn đúng với model thật:**
+
+- Advanced đạt recall 100% ở cả hai bộ.
+- Ở hội thoại ngắn, Advanced tốn hơn **79%** prompt token. Offline là 72%.
+- Ở hội thoại dài, compact giảm **58%** prompt token. Offline là 56%.
+
+**Những điểm chỉ lộ ra khi chạy live:**
+
+1. **Agent tokens only bắt đầu phân biệt được hai agent.** Ở bộ standard, Advanced sinh **10.453** token, còn Baseline sinh **6.078**.
+   - Có profile trong prompt, model trả lời dài hơn và cá nhân hóa hơn.
+   - Đây là khoản tốn thêm mà mục 3.3 dự đoán nhưng chế độ offline không đo được, vì offline chỉ trả lời bằng template.
+   - Ở bộ stress, hai agent gần bằng nhau (3.299 so với 3.356). Compact vẫn chỉ làm giảm cột Prompt tokens.
+2. **Recall 11% của Baseline là ảo.** Ba câu hỏi chứa sẵn đáp án:
+   - conv-05: "Bạn biết **DũngCT** là ai…"
+   - conv-06: "…mình còn ở **Huế** không?"
+   - conv-09: "…mối quan tâm kỹ thuật" (có chuỗi "AI")
+
+   Model thật lặp lại từ trong câu hỏi, nên bộ chấm chuỗi con vẫn cho nửa điểm. Đây là điểm yếu của cách chấm bằng chuỗi con, không phải bằng chứng Baseline nhớ được.
+3. **`User.md` phình nhanh khi model tự ghi memory.** File standard tăng **1.039 B**, so với 407 B ở offline. File stress tăng **793 B**, so với 264 B.
+   - Tool `save_user_fact` để model tự chọn ghi gì. Model đã ghi cả nội dung tạm thời vào `interests`, ví dụ "sửa dataset để các cuộc hội thoại tự nhiên hơn", "chi phí thật", "kế hoạch điện sạch".
+   - `response_style` có tag trùng nghĩa: "ngắn gọn", "gọn hơn", "câu trả lời tự nhiên hơn".
+   - Các fact đơn trị vẫn đúng: tên, nơi ở Huế / Đà Nẵng, nghề MLOps engineer. Lý do là conflict handling vẫn chặn ở `apply_profile_updates()`.
+   - Đây là bằng chứng trực tiếp cho rủi ro 1 ở mục 3.5: guardrail cho các khóa dạng tập hợp (confidence threshold, memory decay, giới hạn số tag) cần thiết hơn khi để LLM tự ghi memory.
+4. **Compactions = 28** ở cả hai bộ. Câu trả lời thật dài hơn template, nên thread standard cũng vượt ngưỡng 600.
+   - Lưu ý: ở chế độ live, cột này đếm compact offline chạy song song với cùng ngưỡng. Nó **không** đếm số lần `SummarizationMiddleware` thật sự tóm tắt.
+
+**Giới hạn còn lại:**
+
+- Response quality vẫn là heuristic. `judge_model` đã có trong config nhưng chưa được nối vào chấm điểm.
+- Prompt tokens ở chế độ live lấy từ `usage_metadata` của lần gọi model **cuối cùng** trong lượt. Nếu một lượt có gọi tool, các lần gọi model trước đó chưa được cộng vào, nên số live của Advanced có thể bị đếm thiếu.
 
 ## 6. Test và kiểm chứng test
 

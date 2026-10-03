@@ -5,6 +5,7 @@
 > - Phân tích kết quả (Bước 8 + bonus): [`STEP8.md`](STEP8.md)
 > - Output benchmark / test đã lưu: [`results/`](results/)
 > - Chạy lại (offline, không cần API key): `python src/benchmark.py` và `pytest src/test_agents.py -v`
+> - Chạy live với model thật: đặt key trong `.env` rồi chạy `LLM_MODE=live python src/benchmark.py` (kết quả gpt-4o-mini: [`results/benchmark_output_live.md`](results/benchmark_output_live.md))
 
 Trong Day 17 này, các bạn sẽ tập trung vào một câu hỏi rất thực tế: làm sao để AI agent **không chỉ trả lời tốt trong một lượt chat**, mà còn **nhớ đúng thông tin quan trọng qua nhiều phiên làm việc** mà vẫn kiểm soát được chi phí token.
 
