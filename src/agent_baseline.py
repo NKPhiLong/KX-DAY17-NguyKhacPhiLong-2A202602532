@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import sys
+
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -133,5 +135,6 @@ class BaselineAgent:
                 system_prompt=BASELINE_SYSTEM_PROMPT,
                 checkpointer=InMemorySaver(),
             )
-        except Exception:
+        except Exception as exc:
+            print(f"[BaselineAgent] live mode unavailable, falling back to offline: {exc}", file=sys.stderr)
             return None

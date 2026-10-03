@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import sys
+
 from dataclasses import dataclass
 from typing import Any
 
@@ -14,6 +16,16 @@ from memory_store import (
     extract_profile_updates,
 )
 from model_provider import build_chat_model
+
+# Live-mode dependencies are optional. They are imported at module level because tool and
+# middleware schemas are built from type hints, which must resolve in module globals.
+try:
+    from langchain.agents import create_agent
+    from langchain.agents.middleware import ModelRequest, SummarizationMiddleware, dynamic_prompt
+    from langchain.tools import ToolRuntime, tool
+    from langgraph.checkpoint.memory import InMemorySaver
+except ImportError:  # offline mode needs none of these
+    create_agent = None
 
 ADVANCED_SYSTEM_PROMPT = (
     "Bạn là trợ lý tiếng Việt có bộ nhớ dài hạn. Hồ sơ người dùng (User.md) là nguồn sự thật cho các fact ổn định; "
@@ -168,12 +180,7 @@ class AdvancedAgent:
         Returns None when dependencies are missing so the caller falls back to offline.
         """
 
-        try:
-            from langchain.agents import create_agent
-            from langchain.agents.middleware import ModelRequest, SummarizationMiddleware, dynamic_prompt
-            from langchain.tools import ToolRuntime, tool
-            from langgraph.checkpoint.memory import InMemorySaver
-        except ImportError:
+        if create_agent is None:
             return None
 
         store = self.profile_store
@@ -219,5 +226,6 @@ class AdvancedAgent:
                 context_schema=AgentContext,
                 checkpointer=InMemorySaver(),
             )
-        except Exception:
+        except Exception as exc:
+            print(f"[AdvancedAgent] live mode unavailable, falling back to offline: {exc}", file=sys.stderr)
             return None
