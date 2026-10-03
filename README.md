@@ -1,5 +1,11 @@
 # Phase 2, Track 3, Day 17: Memory Systems for AI Agent
 
+> **Bài làm:** NguyKhacPhiLong — 2A202602532
+>
+> - Phân tích kết quả (Bước 8 + bonus): [`STEP8.md`](STEP8.md)
+> - Output benchmark / test đã lưu: [`results/`](results/)
+> - Chạy lại (offline, không cần API key): `python src/benchmark.py` và `pytest src/test_agents.py -v`
+
 Trong Day 17 này, các bạn sẽ tập trung vào một câu hỏi rất thực tế: làm sao để AI agent **không chỉ trả lời tốt trong một lượt chat**, mà còn **nhớ đúng thông tin quan trọng qua nhiều phiên làm việc** mà vẫn kiểm soát được chi phí token.
 
 Trong bài lab này, các bạn sẽ xây dựng và so sánh hai agent:
