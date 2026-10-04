@@ -2,8 +2,8 @@
 
 Tài liệu này giải thích các con số do `python src/benchmark.py` sinh ra. Mỗi luận điểm đi theo ba bước: **số liệu → cơ chế trong `src/` tạo ra số liệu đó → giới hạn đi kèm**.
 
-- Output benchmark đầy đủ: [`results/benchmark_output.md`](results/benchmark_output.md)
-- Output test: [`results/pytest_output.txt`](results/pytest_output.txt) (8/8 pass)
+- Số liệu offline (số liệu chính): mục 2. Số liệu live với gpt-4o-mini: mục 5.
+- Test: `pytest src/test_agents.py -v`, 8/8 pass (mục 6).
 
 ## 1. Cách chạy lại
 
@@ -222,7 +222,7 @@ Bonus được chọn theo điểm yếu thật của data: data cố tình ch�
 
 ## 5. Chế độ live: chạy với OpenAI gpt-4o-mini
 
-Lệnh chạy: `LLM_MODE=live python src/benchmark.py`, với key trong `.env`. Output đầy đủ: [`results/benchmark_output_live.md`](results/benchmark_output_live.md).
+Lệnh chạy: `LLM_MODE=live python src/benchmark.py`, với key trong `.env`.
 
 Kết quả live **không tất định**: model thật trả lời khác nhau giữa các lần chạy. Vì vậy số liệu chính của bài vẫn là số offline ở mục 2. Số live dùng để kiểm tra các kết luận có còn đúng với model thật hay không.
 

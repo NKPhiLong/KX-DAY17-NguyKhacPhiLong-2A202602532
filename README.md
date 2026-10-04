@@ -3,9 +3,8 @@
 > **Bài làm:** NguyKhacPhiLong — 2A202602532
 >
 > - Phân tích kết quả (Bước 8 + bonus): [`STEP8.md`](STEP8.md)
-> - Output benchmark / test đã lưu: [`results/`](results/)
 > - Chạy lại (offline, không cần API key): `python src/benchmark.py` và `pytest src/test_agents.py -v`
-> - Chạy live với model thật: đặt key trong `.env` rồi chạy `LLM_MODE=live python src/benchmark.py` (kết quả gpt-4o-mini: [`results/benchmark_output_live.md`](results/benchmark_output_live.md))
+> - Chạy live với model thật: đặt key trong `.env` rồi chạy `LLM_MODE=live python src/benchmark.py` (kết quả gpt-4o-mini: mục 5 của `STEP8.md`)
 
 Trong Day 17 này, các bạn sẽ tập trung vào một câu hỏi rất thực tế: làm sao để AI agent **không chỉ trả lời tốt trong một lượt chat**, mà còn **nhớ đúng thông tin quan trọng qua nhiều phiên làm việc** mà vẫn kiểm soát được chi phí token.
 
@@ -37,12 +36,11 @@ Sau khi hoàn thành, các bạn cần có khả năng:
 ```
 .
 ├── README.md        # giới thiệu track (file này)
-├── Guide.md         # hướng dẫn từng bước
-├── Rubric.md        # tiêu chí chấm điểm
+├── STEP8.md         # phân tích kết quả (Bước 8) và bonus
 ├── data/            # dữ liệu benchmark dùng chung
 │   ├── conversations.json
 │   └── advanced_long_context.json
-└── src/             # bản scaffold dành cho sinh viên (pseudocode + TODO)
+└── src/             # memory layer, hai agent, benchmark và test đã hoàn thiện
     ├── model_provider.py
     ├── config.py
     ├── memory_store.py
@@ -185,7 +183,6 @@ Nếu các bạn là giảng viên hoặc reviewer:
 
 ## Tài liệu nên đọc tiếp
 
-- `Guide.md`: hướng dẫn từng bước để hoàn thành lab
-- `Rubric.md`: tiêu chí chấm điểm và bonus
+- `STEP8.md`: phân tích kết quả benchmark, phép tắt từng lớp memory và đánh giá bonus
 
 Track này được thiết kế để các bạn không chỉ “dùng agent”, mà còn bắt đầu nghĩ như một người thiết kế **memory system** cho agent production.

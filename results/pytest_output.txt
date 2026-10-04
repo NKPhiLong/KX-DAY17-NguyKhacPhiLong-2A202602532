@@ -1,9 +1,0 @@
-src/test_agents.py::test_user_markdown_read_write_edit PASSED            [ 12%]
-src/test_agents.py::test_compact_trigger PASSED                          [ 25%]
-src/test_agents.py::test_cross_session_recall PASSED                     [ 37%]
-src/test_agents.py::test_compact_reduces_prompt_load_on_long_thread PASSED [ 50%]
-src/test_agents.py::test_correction_keeps_only_latest_fact PASSED        [ 62%]
-src/test_agents.py::test_noise_and_questions_are_not_saved PASSED        [ 75%]
-src/test_agents.py::test_stress_dataset_recall_and_correction PASSED     [ 87%]
-src/test_agents.py::test_benchmark_is_deterministic PASSED               [100%]
-============================== 8 passed in 0.07s ===============================
